@@ -1,9 +1,10 @@
 <?php
+  include_once('regRuApi.class.php');
   /**
    * Class for getting shop.reg.ru lots data 
    */
 
-	class regRuApiShop{
+	class regRuApiShop extends regRuApi{
 
     /**
      * @var $settingQuery Array Wшер data for creating query to API for getting data with lots   
@@ -51,20 +52,13 @@
      * @param $pwd String Password reg.ru
      * @return void
      */
-		public function __construct($login, $pwd){
+		public function __construct($login, $pwd, $countLotsPerPage=500){
 			$this->settingQuery->login = $login;
 			$this->settingQuery->password = $pwd;
+			$this->settingQuery->itemsonpage = $countLotsPerPage;
     }
 
-    /**
-     * Form and send query to API with $queryData
-     * @param $queryData Array Data for api query
-     * @return $answerData Object Return query answer
-     */
-    private function sendQueryToApi($queryData){
-      $queryUrl = $this->$queryUrl.http_build_query($queryData);
-      return $answerData = json_decode(file_get_contents($queryUrl));
-    }
+   
     
     /**
      * Get total count lots in shop.reg.ru. If query return with error - stop working and write error message.
