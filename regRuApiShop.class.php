@@ -8,12 +8,13 @@
 
     /**
      * @var $settingQuery Array Wшер data for creating query to API for getting data with lots   
+     * param itemsonpage is not working in regApi. Use default 25.
      */
 		private $settingQuery = array(
 			'username' => '',
 			'password' => '',
 			'pg' => 0,
-			'itemsonpage' => 500,
+			'itemsonpage' => 25,
 			'show_my_lots' => 1,
 			'output_content_type' => 'plain',
     );
@@ -52,10 +53,10 @@
      * @param $pwd String Password reg.ru
      * @return void
      */
-		public function __construct($login, $pwd, $countLotsPerPage=500){
-			$this->settingQuery->login = $login;
-			$this->settingQuery->password = $pwd;
-			$this->settingQuery->itemsonpage = $countLotsPerPage;
+		public function __construct($login, $pwd, $countLotsPerPage=25){
+			$this->settingQuery['username'] = $login;
+			$this->settingQuery['password'] = $pwd;
+			$this->settingQuery['itemsonpage'] = $countLotsPerPage;
     }
 
    
@@ -67,11 +68,11 @@
     private function getCountUrlsInShop(){
       $answerData = $this->sendQueryToApi($this->settingQuery);
 
-      if ($answerData->result == $this->status->success){
-        $lots->countLots = int($answerData->answer->lots_cnt);
-        return $lots->countLots;
+      if ($answerData->result === $this->status['success']){
+        $this->lots['countLots'] = $answerData->answer->lots_cnt;
+        return $this->lots['countLots'];
       }else{
-        die($this->error->ERROR_GET_COUNT_LOTS);
+        die($this->error['ERROR_GET_COUNT_LOTS']);
       }
     }
 
@@ -81,12 +82,13 @@
      * @return void
      */
     private function importExistedLots($dataLots){
+      
       foreach ($dataLots as $dataLot){
-        array_push($this->lots->allLots, $dataLot->dname_puny);
-        if ($dataLot->dname_puny->is_online){
-          array_push($this->lots->onlineStatusLots, $dataLot->dname_puny);
+        array_push($this->lots['allLots'], $dataLot->dname_puny);
+        if ($dataLot->is_online){
+          array_push($this->lots['onlineStatusLots'], $dataLot->dname_puny);
         }else{
-          array_push($this->lots->offlineStatusLots, $dataLot->dname_puny);
+          array_push($this->lots['offlineStatusLots'], $dataLot->dname_puny);
         }
       }
     }
@@ -96,9 +98,9 @@
      * @return $this->lots Array with data lots
      */
     public function getLotsInShop(){
-      $countLots = $this->getCountUrlsInShop();
+      echo $countLots = $this->getCountUrlsInShop();
 
-      for ($i = 0; $i < round($countLots/$this->settingQuery->itemsonpage); $i++){
+      for ($i = 0; $i < round($countLots/$this->settingQuery['itemsonpage']); $i++){
         $dataLots = $this->getLotsDataFromPage($i);
         $this->importExistedLots($dataLots);
       }
@@ -111,10 +113,10 @@
      * @return $dataLots  Array Data lots from api return.
      */
 		private function getLotsDataFromPage($page){
-      $this->settingQuery->pg = $page;
+      $this->settingQuery['pg'] = $page;
       $answerData = $this->sendQueryToApi($this->settingQuery);
 
-      if ($answerData->result == $this->status->success){
+      if ($answerData->result == $this->status['success']){
         return $answerData->answer->lots;
       }else{
         die($this->error->ERROR_GET_COUNT_LOTS);
